@@ -1,13 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
+	"sync"
 	"time"
 )
 
@@ -30,14 +31,17 @@ var osRegex = map[string]*regexp.Regexp{
 }
 
 // extractUserAgentInfo extracts browser and OS information from a user-agent string.
-func extractUserAgentInfo(userAgent string) (string, string) {
-	var browser, os string
-
-	// Extract browser information
+func extractUserAgentInfo(userAgent string, buffer *bytes.Buffer) {
 	for _, regex := range browserRegex {
 		match := regex.FindStringSubmatch(userAgent)
+
 		if len(match) > 2 {
-			browser = match[1] + " " + match[2]
+			// browser = match[1] + " " + match[2]
+			buffer.WriteString("\nBrowser: ")
+			buffer.WriteString(match[1])
+			buffer.WriteString(" ")
+			buffer.WriteString(match[2])
+
 			break
 		}
 	}
@@ -45,18 +49,21 @@ func extractUserAgentInfo(userAgent string) (string, string) {
 	// Extract OS information
 	for key, regex := range osRegex {
 		match := regex.FindStringSubmatch(userAgent)
+
 		if len(match) > 0 {
+			buffer.WriteString("\nOS: ")
+
 			if key == "Linux" {
-				os = "Linux"
+				buffer.WriteString("Linux")
 			} else {
-				os = match[1] + " " + match[2]
+				buffer.WriteString(match[1])
+				buffer.WriteString(" ")
+				buffer.WriteString(match[2])
 			}
 
 			break
 		}
 	}
-
-	return browser, os
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
@@ -75,34 +82,40 @@ func getHostname() string {
 	return host
 }
 
+var bufferPool = sync.Pool{
+	New: func() any {
+		return &bytes.Buffer{}
+	},
+}
+
 func getStats(ua string) string {
-	stats := make([]string, 0, 4)
+	buffer := bufferPool.Get().(*bytes.Buffer)
+	buffer.Reset()
+
+	// stats := make([]string, 0, 4)
 
 	timeNow := time.Now()
 
 	// Add the hostname to the stats
-	stats = append(stats, "Hostname: "+hostname)
+	// stats = append(stats, "Hostname: "+hostname)
+	buffer.WriteString("Hostname: ")
+	buffer.WriteString(hostname)
 
 	// Extract browser and OS information from the user-agent string
-	browser, os := extractUserAgentInfo(ua)
-
-	// Format the extracted information
-	if browser != "" {
-		stats = append(stats, "Browser: "+browser)
-	}
-	if os != "" {
-		stats = append(stats, "OS: "+os)
-	}
+	extractUserAgentInfo(ua, buffer)
 
 	latency := strconv.Itoa(int(time.Since(timeNow).Microseconds()))
 
 	// Add the latency to the stats
-	stats = append(stats, "Latency: "+latency)
+	// stats = append(stats, "Latency: "+latency)
+	buffer.WriteString("\nLatency: ")
+	buffer.WriteString(latency)
 
 	// Join the information strings
-	response := strings.Join(stats, "\n")
+	// response := strings.Join(stats, "\n")
+	bufferPool.Put(buffer)
 
-	return response
+	return buffer.String()
 }
 
 func main() {
