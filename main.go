@@ -31,16 +31,6 @@ var osRegex = map[string]*regexp.Regexp{
 
 // extractUserAgentInfo extracts browser and OS information from a user-agent string.
 func extractUserAgentInfo(userAgent string) (string, string) {
-	// browserRegex := []*regexp.Regexp{regexp.MustCompile(`(Chrome)/(\d+\.\d+)`),
-	// 	regexp.MustCompile(`(Firefox)/(\d+\.\d+)`),
-	// }
-	//
-	// osRegex := map[string]*regexp.Regexp{
-	// 	"Windows": regexp.MustCompile(`(Windows NT) (\d+\.\d+)`),
-	// 	"MacOS":   regexp.MustCompile(`(Mac OS X) (\d+\_\d+)`),
-	// 	"Linux":   regexp.MustCompile(`Linux`),
-	// }
-
 	var browser, os string
 
 	// Extract browser information
@@ -77,15 +67,21 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(response))
 }
 
+var hostname = getHostname()
+
+func getHostname() string {
+	host, _ := os.Hostname()
+
+	return host
+}
+
 func getStats(ua string) string {
 	var stats []string
 
 	timeNow := time.Now()
 
-	host, _ := os.Hostname()
-
 	// Add the hostname to the stats
-	stats = append(stats, "Hostname: "+host)
+	stats = append(stats, "Hostname: "+hostname)
 
 	// Extract browser and OS information from the user-agent string
 	browser, os := extractUserAgentInfo(ua)
