@@ -18,28 +18,28 @@ type UserAgentInfo struct {
 }
 
 // userAgentRegex maps regular expressions to extract browser and OS information.
-var browserRegex = map[string]*regexp.Regexp{
-	"Chrome":  regexp.MustCompile(`(Chrome)/(\d+\.\d+)`),
-	"Firefox": regexp.MustCompile(`(Firefox)/(\d+\.\d+)`),
-}
-
-var osRegex = map[string]*regexp.Regexp{
-	"Windows": regexp.MustCompile(`(Windows NT) (\d+\.\d+)`),
-	"MacOS":   regexp.MustCompile(`(Mac OS X) (\d+\_\d+)`),
-	"Linux":   regexp.MustCompile(`Linux`),
-}
+// var browserRegex = map[string]*regexp.Regexp{
+// 	"Chrome":  regexp.MustCompile(`(Chrome)/(\d+\.\d+)`),
+// 	"Firefox": regexp.MustCompile(`(Firefox)/(\d+\.\d+)`),
+// }
+//
+// var osRegex = map[string]*regexp.Regexp{
+// 	"Windows": regexp.MustCompile(`(Windows NT) (\d+\.\d+)`),
+// 	"MacOS":   regexp.MustCompile(`(Mac OS X) (\d+\_\d+)`),
+// 	"Linux":   regexp.MustCompile(`Linux`),
+// }
 
 // extractUserAgentInfo extracts browser and OS information from a user-agent string.
 func extractUserAgentInfo(userAgent string) (string, string) {
-	// browserRegex := []*regexp.Regexp{regexp.MustCompile(`(Chrome)/(\d+\.\d+)`),
-	// 	regexp.MustCompile(`(Firefox)/(\d+\.\d+)`),
-	// }
-	//
-	// osRegex := map[string]*regexp.Regexp{
-	// 	"Windows": regexp.MustCompile(`(Windows NT) (\d+\.\d+)`),
-	// 	"MacOS":   regexp.MustCompile(`(Mac OS X) (\d+\_\d+)`),
-	// 	"Linux":   regexp.MustCompile(`Linux`),
-	// }
+	browserRegex := []*regexp.Regexp{regexp.MustCompile(`(Chrome)/(\d+\.\d+)`),
+		regexp.MustCompile(`(Firefox)/(\d+\.\d+)`),
+	}
+
+	osRegex := map[string]*regexp.Regexp{
+		"Windows": regexp.MustCompile(`(Windows NT) (\d+\.\d+)`),
+		"MacOS":   regexp.MustCompile(`(Mac OS X) (\d+\_\d+)`),
+		"Linux":   regexp.MustCompile(`Linux`),
+	}
 
 	var browser, os string
 
