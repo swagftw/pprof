@@ -76,7 +76,7 @@ func getHostname() string {
 }
 
 func getStats(ua string) string {
-	var stats []string
+	stats := make([]string, 0, 4)
 
 	timeNow := time.Now()
 
